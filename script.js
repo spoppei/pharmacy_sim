@@ -18,7 +18,7 @@ const SHIFT_START  = 9 * 60;   // 9:00 AM in minutes
 const LUNCH_START  = 12 * 60;  // 12:00 PM
 const LUNCH_END    = 13 * 60;  // 1:00 PM
 const SHIFT_END    = 17 * 60;  // 5:00 PM
-const TICK_INTERVAL = 2000;     // real ms per game minute (2s = 1 game min, full shift ~4.8 min real time)
+const TICK_INTERVAL = 1000;     // real ms per game minute (1s = 1 game min, full shift ~8 min real time)
 
 // Shelf categories — maps display name to quiz codes
 const shelfCategories = [
@@ -70,7 +70,7 @@ function startClock() {
 }
 
 function tickClock() {
-  if (state.onLunch || state.shiftOver || state.awaitingNext) return;
+  if (state.onLunch || state.shiftOver) return;
   state.clockMinutes++;
   renderClock();
 
