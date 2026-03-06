@@ -1,4 +1,4 @@
-// PHARMACY SIM — script.js (clean rewrite)
+// PHARMACY SIM — script.js
 
 const SHELF_CATEGORIES = [
   { name:"🌬 Asthma & Allergies",       quizzes:["F1","W7"] },
@@ -16,7 +16,7 @@ const SHIFT_START = 9 * 60;
 const LUNCH_START = 12 * 60;
 const LUNCH_END   = 13 * 60;
 const SHIFT_END   = 17 * 60;
-const TICK_MS     = 1000;  // 1s per game-minute → ~8 min real-time for a full shift
+const TICK_MS     = 2000;
 
 function el(id) { return document.getElementById(id); }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -48,14 +48,9 @@ var dispensed       = false;
 var scenarioPool    = [];
 var poolIdx         = 0;
 
+// FIX: added waitTicks to track impatience
 function makePatient() {
-  // Added waitTicks to track how long they are in line
-  return { 
-    name: pick(PATIENT_NAMES), 
-    avatar: pick(PATIENT_AVATARS), 
-    mood: pick(PATIENT_MOODS),
-    waitTicks: 0 
-  };
+  return { name: pick(PATIENT_NAMES), avatar: pick(PATIENT_AVATARS), mood: pick(PATIENT_MOODS), waitTicks: 0 };
 }
 
 function initPool() {
@@ -79,17 +74,15 @@ function renderQueue() {
     wrap.innerHTML = '<span style="opacity:0.6;font-style:italic;font-size:0.9em;">Nobody waiting...</span>';
     return;
   }
-queue.forEach(function(p, i) {
+  queue.forEach(function(p, i) {
     var div = document.createElement("div");
     div.className = "queue-person" + (i === 0 ? " active" : "");
-    
-    // Turn their queue bubble red if they are mad
+    // FIX: turn red if impatient
     if (p.mood === "impatient" || p.mood === "angry") {
-        div.style.borderColor = "var(--red)";
-        div.style.color = "var(--red)";
-        div.style.backgroundColor = "var(--red-light)";
+      div.style.borderColor = "var(--red)";
+      div.style.color = "var(--red)";
+      div.style.backgroundColor = "var(--red-light)";
     }
-    
     div.textContent = p.avatar + " " + p.name;
     wrap.appendChild(div);
   });
@@ -102,6 +95,7 @@ function renderClock() {
   el("clock-display").classList.toggle("near-end", clockMin >= SHIFT_END-10);
 }
 
+// FIX: impatient logic at 20 ticks (40 real seconds)
 function startClock() {
   if (clockTick) clearInterval(clockTick);
   clockTick = setInterval(function() {
@@ -109,44 +103,32 @@ function startClock() {
     clockMin++;
     renderClock();
 
-    // --- IMPATIENT LOGIC ---
-    let queueChanged = false;
+    var queueChanged = false;
     queue.forEach(function(p) {
       p.waitTicks++;
-      // If they wait for 30 ticks and aren't already annoyed:
       if (p.waitTicks === 20 && p.mood !== "angry" && p.mood !== "impatient") {
-         p.mood = "impatient";
-         queueChanged = true;
+        p.mood = "impatient";
+        queueChanged = true;
       }
     });
-    // Re-render the queue so we can see the color change
-    if (queueChanged) renderQueue(); 
-    // -----------------------
+    if (queueChanged) renderQueue();
 
     if (clockMin >= SHIFT_END)   { endShift();   return; }
     if (clockMin >= LUNCH_START) { startLunch(); return; }
   }, TICK_MS);
 }
 
+// FIX: uses clearTimeout since this is a recursive setTimeout chain
 function startGrowth() {
   if (growthTick) clearTimeout(growthTick);
-  
+
   function spawnPatient() {
     if (onLunch || shiftOver) return;
-    
-    // Add a patient if the queue isn't full (less than 4 people)
-    if (queue.length < 4) {
-      addToQueue();
-    }
-    
-    // Pick a random time between 10 and 30 seconds (10000ms to 30000ms)
+    if (queue.length < 4) addToQueue();
     var nextDelay = 10000 + Math.random() * 20000;
-    
-    // Schedule the next person
     growthTick = setTimeout(spawnPatient, nextDelay);
   }
-  
-  // Kick off the very first background spawn
+
   growthTick = setTimeout(spawnPatient, 10000 + Math.random() * 20000);
 }
 
@@ -184,7 +166,7 @@ function initHome() {
 // ── START SHIFT ────────────────────────────────
 function startShift() {
   if (clockTick)  clearInterval(clockTick);
-  if (growthTick) clearInterval(growthTick);
+  if (growthTick) clearTimeout(growthTick);   // FIX: was clearInterval
 
   clockMin=SHIFT_START; onLunch=false; shiftOver=false;
   statServed=0; statCorrect=0; statErrors=0; statStreak=0; statBest=0;
@@ -200,7 +182,6 @@ function startShift() {
 
   showScreen("game");
 
-  // Start with two people: one at counter, one waiting
   addToQueue();
   addToQueue();
   serveNext();
@@ -226,7 +207,6 @@ function serveNext() {
     el("patient-window").style.opacity = "0.5";
     el("complaint-wrap").innerHTML = '<div style="padding:20px 0;color:var(--text-muted);font-style:italic;font-weight:700;font-size:0.9em;">⏳ Waiting for next patient to arrive...</div>';
     el("hint-btn").style.display = "none";
-    // Guarantee someone arrives in exactly 3 seconds
     setTimeout(function() {
       addToQueue();
       serveNext();
@@ -374,10 +354,7 @@ el("next-patient-btn").onclick = function() { serveNext(); };
 // ── COUNTER STRIP ──────────────────────────────
 function updateCounterStrip() {
   if (!currentScenario) return;
-  
-  // Replace the giveaway line with a generic status:
-  el("counter-rx-main").textContent = "Active Prescription"; 
-  
+  el("counter-rx-main").textContent = "Active Prescription";
   el("counter-rx-sub").textContent  = currentScenario.type==="slip"?"📄 Prescription slip":"💬 Patient at counter";
 }
 
@@ -429,12 +406,16 @@ el("close-early-btn").onclick = function() {
 };
 el("home-btn").onclick = function() {
   if (confirm("Go back to home? Progress will be lost.")) {
-    clearInterval(clockTick); clearInterval(growthTick); showScreen("home");
+    clearInterval(clockTick);
+    clearTimeout(growthTick);   // FIX: was clearInterval
+    showScreen("home");
   }
 };
 
 function endShift() {
-  clearInterval(clockTick); clearInterval(growthTick); shiftOver=true;
+  clearInterval(clockTick);
+  clearTimeout(growthTick);     // FIX: was clearInterval
+  shiftOver=true;
   var pct = statServed>0 ? Math.round((statCorrect/statServed)*100) : 100;
   var stars="⭐⭐⭐⭐⭐", label="Perfect Shift! You're a star pharmacist! 🌟";
   if (pct<95){stars="⭐⭐⭐⭐";label="Excellent! Almost flawless.";}
