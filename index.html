@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rx Counter — Pharmacy Sim</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: ONBOARDING
+     ═══════════════════════════════════════════ -->
+<div class="screen active" id="screen-onboard">
+  <div class="onboard-box">
+    <div class="onboard-logo">Rx <span>Counter</span></div>
+    <div class="onboard-sub">Your pharmacy shift simulator</div>
+
+    <label class="onboard-label">Your Pharmacist Name</label>
+    <input
+      type="text"
+      id="pharmacist-name"
+      class="onboard-input"
+      placeholder="e.g. Dr. Rivera"
+      maxlength="30"
+      autocomplete="off"
+    >
+
+    <label class="onboard-label">Choose Your Avatar</label>
+    <div class="avatar-row" id="avatar-row"></div>
+
+    <button class="start-shift-btn" id="start-shift-btn" disabled>
+      🏥 Start Your Shift (9 AM)
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: GAME
+     ═══════════════════════════════════════════ -->
+<div class="screen" id="screen-game">
+
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <div class="top-bar-name" id="pharmacist-display">🧑‍⚕️ Pharmacist</div>
+    <div class="top-bar-stats">
+      <div class="stat-chip">🕐 <span id="clock-display">9:00 AM</span></div>
+      <div class="stat-chip">👥 <strong id="stat-served">0</strong> served</div>
+      <div class="stat-chip">✅ <strong id="stat-correct">0</strong> correct</div>
+      <div class="stat-chip">🎯 <strong id="stat-pct">100%</strong></div>
+      <div class="stat-chip">🔥 <strong id="stat-streak">0</strong> streak</div>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div id="game-layout">
+
+    <!-- LEFT: Counter Area -->
+    <div id="counter-area">
+
+      <!-- Patient Window -->
+      <div id="patient-window">
+        <div class="patient-row">
+          <div class="patient-avatar-wrap">
+            <div class="patient-emoji" id="patient-emoji">👨</div>
+            <div class="patient-name" id="patient-name-label">Patient</div>
+            <div class="patient-mood-badge" id="patient-mood">friendly</div>
+          </div>
+          <div class="speech-bubble" id="complaint-text">
+            Loading your first patient...
+          </div>
+        </div>
+      </div>
+
+      <!-- Hint -->
+      <button id="hint-btn">💡 Need a hint?</button>
+      <div id="hint-area" class="hint-area">
+        <span id="hint-text"></span>
+      </div>
+
+      <!-- Selected Drug Preview -->
+      <div id="selection-area">
+        <div>
+          <div id="selected-drug-name">—</div>
+          <div id="selected-drug-class">Select a drug from the shelf</div>
+        </div>
+        <button id="dispense-btn">Give to Patient →</button>
+      </div>
+
+      <!-- Feedback -->
+      <div id="feedback-area"></div>
+
+      <!-- Next Patient -->
+      <button id="next-patient-btn" class="">Next Patient →</button>
+
+    </div><!-- end counter-area -->
+
+    <!-- RIGHT: Drug Shelf -->
+    <div id="shelf-area">
+      <div class="shelf-header">🏪 Drug Shelf</div>
+      <input
+        type="text"
+        id="shelf-search"
+        placeholder="🔍 Search drugs..."
+        autocomplete="off"
+      >
+      <div id="shelf-list"></div>
+    </div>
+
+  </div><!-- end game-layout -->
+</div><!-- end screen-game -->
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: LUNCH BREAK
+     ═══════════════════════════════════════════ -->
+<div class="screen" id="screen-break">
+  <div class="break-box">
+    <div class="break-title">☕ Lunch Break!</div>
+    <div class="break-sub" id="break-pharmacist">Dr. Pharmacist</div>
+    <div class="break-sub">Here's how your morning went:</div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-val" id="break-served">0</div>
+        <div class="stat-card-label">Patients Served</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" id="break-correct">0</div>
+        <div class="stat-card-label">Correct Fills</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" id="break-errors">0</div>
+        <div class="stat-card-label">Errors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" id="break-streak">0</div>
+        <div class="stat-card-label">Best Streak</div>
+      </div>
+    </div>
+
+    <div class="stat-card" style="margin-bottom:20px;">
+      <div class="stat-card-val" id="break-pct">—</div>
+      <div class="stat-card-label">Morning Accuracy</div>
+    </div>
+
+    <button class="action-btn primary" id="resume-btn">
+      🏥 Back to Work (1 PM)
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: END OF DAY
+     ═══════════════════════════════════════════ -->
+<div class="screen" id="screen-end">
+  <div class="end-box">
+    <div class="end-title">🌇 End of Shift!</div>
+    <div class="break-sub" id="end-pharmacist">Dr. Pharmacist</div>
+
+    <div class="rating-stars" id="end-stars">⭐⭐⭐⭐⭐</div>
+    <div class="rating-label" id="end-rating">Perfect Shift!</div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-val" id="end-served">0</div>
+        <div class="stat-card-label">Patients Served</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" id="end-correct">0</div>
+        <div class="stat-card-label">Correct Fills</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" id="end-errors">0</div>
+        <div class="stat-card-label">Errors Made</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" id="end-streak">0</div>
+        <div class="stat-card-label">Best Streak</div>
+      </div>
+    </div>
+
+    <div class="stat-card" style="margin-bottom:20px;">
+      <div class="stat-card-val" id="end-pct">—</div>
+      <div class="stat-card-label">Overall Accuracy</div>
+    </div>
+
+    <!-- Missed drugs -->
+    <div id="end-missed-section" style="display:none;">
+      <div class="missed-drugs-list">
+        <div class="missed-drugs-title">Drugs to Review:</div>
+        <div id="end-missed-list"></div>
+      </div>
+    </div>
+
+    <button class="action-btn primary" id="new-shift-btn">
+      🔄 Start a New Shift
+    </button>
+  </div>
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="drugs.js"></script>
+<script src="scenarios.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
