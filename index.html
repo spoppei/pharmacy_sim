@@ -9,80 +9,90 @@
 <body>
 
 <!-- ═══════════════════════════════════════════
-     SCREEN: ONBOARDING
+     HOME SCREEN
      ═══════════════════════════════════════════ -->
-<div class="screen active" id="screen-onboard">
-  <div class="onboard-box">
-    <div class="onboard-logo">Rx <span>Counter</span></div>
-    <div class="onboard-sub">Your pharmacy shift simulator</div>
+<div class="screen active" id="screen-home">
+  <div class="home-box">
+    <div class="home-logo">Rx <span>Counter</span></div>
+    <div class="home-tagline">Your pharmacy shift simulator — Top 200 Drugs</div>
 
-    <label class="onboard-label">Your Pharmacist Name</label>
-    <input
-      type="text"
-      id="pharmacist-name"
-      class="onboard-input"
-      placeholder="e.g. Dr. Rivera"
-      maxlength="30"
-      autocomplete="off"
-    >
+    <label class="home-section-label">Your Pharmacist Name</label>
+    <input type="text" id="pharmacist-name" class="home-input"
+      placeholder="e.g. Dr. Rivera" maxlength="30" autocomplete="off">
 
-    <label class="onboard-label">Choose Your Avatar</label>
+    <label class="home-section-label">Choose Your Avatar</label>
     <div class="avatar-row" id="avatar-row"></div>
 
-    <button class="start-shift-btn" id="start-shift-btn" disabled>
-      🏥 Start Your Shift (9 AM)
+    <button class="home-start-btn" id="home-start-btn" disabled>
+      🏥 Start Your Shift
     </button>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     SCREEN: GAME
+     GAME SCREEN
      ═══════════════════════════════════════════ -->
 <div class="screen" id="screen-game">
 
   <!-- Top Bar -->
   <div id="top-bar">
-    <div class="top-bar-name" id="pharmacist-display">🧑‍⚕️ Pharmacist</div>
-    <div class="top-bar-stats">
+    <div class="top-left">
+      <div class="top-pharmacist" id="top-pharmacist">🧑‍⚕️ Pharmacist</div>
+    </div>
+    <div class="top-stats">
       <div class="stat-chip">🕐 <span id="clock-display">9:00 AM</span></div>
       <div class="stat-chip">👥 <strong id="stat-served">0</strong> served</div>
       <div class="stat-chip">✅ <strong id="stat-correct">0</strong> correct</div>
       <div class="stat-chip">🎯 <strong id="stat-pct">100%</strong></div>
-      <div class="stat-chip">🔥 <strong id="stat-streak">0</strong> streak</div>
+      <div class="stat-chip">🔥 <strong id="stat-streak">0</strong></div>
+    </div>
+    <div class="top-right">
+      <button class="top-btn" id="home-btn">🏠 Home</button>
+      <button class="top-btn danger" id="close-early-btn">🔒 Close Early</button>
     </div>
   </div>
 
   <!-- Main Layout -->
   <div id="game-layout">
 
-    <!-- LEFT: Counter Area -->
+    <!-- LEFT: Counter -->
     <div id="counter-area">
+
+      <!-- Queue bar -->
+      <div id="queue-bar">
+        <span class="queue-label">🪑 Waiting:</span>
+        <div class="queue-avatars" id="queue-avatars">
+          <span id="queue-idle" style="display:none;">No one in line right now...</span>
+        </div>
+      </div>
+
+      <!-- Waiting idle message -->
+      <div id="waiting-msg">
+        ⏳ Waiting for the next customer to come in...
+      </div>
 
       <!-- Patient Window -->
       <div id="patient-window">
         <div class="patient-row">
           <div class="patient-avatar-wrap">
-            <div class="patient-emoji" id="patient-emoji">👨</div>
+            <div class="patient-emoji" id="patient-emoji">🧑</div>
             <div class="patient-name" id="patient-name-label">Patient</div>
-            <div class="patient-mood-badge" id="patient-mood">friendly</div>
+            <div class="patient-mood" id="patient-mood">friendly</div>
           </div>
-          <div class="speech-bubble" id="complaint-text">
-            Loading your first patient...
-          </div>
+          <!-- Speech bubble or rx slip injected here -->
+          <div id="complaint-wrap" style="flex:1; display:flex; align-items:flex-start;"></div>
         </div>
       </div>
 
       <!-- Hint -->
       <button id="hint-btn">💡 Need a hint?</button>
-      <div id="hint-area" class="hint-area">
-        <span id="hint-text"></span>
-      </div>
+      <div id="hint-area"><span id="hint-text"></span></div>
 
-      <!-- Selected Drug Preview -->
+      <!-- Selected drug preview + dispense -->
       <div id="selection-area">
         <div>
           <div id="selected-drug-name">—</div>
-          <div id="selected-drug-class">Select a drug from the shelf</div>
+          <div id="selected-drug-class">Select a drug from the shelf →</div>
         </div>
         <button id="dispense-btn">Give to Patient →</button>
       </div>
@@ -90,34 +100,50 @@
       <!-- Feedback -->
       <div id="feedback-area"></div>
 
-      <!-- Next Patient -->
-      <button id="next-patient-btn" class="">Next Patient →</button>
+      <!-- Next patient -->
+      <button id="next-patient-btn">Next Patient →</button>
 
     </div><!-- end counter-area -->
 
-    <!-- RIGHT: Drug Shelf -->
+    <!-- RIGHT: Shelf -->
     <div id="shelf-area">
       <div class="shelf-header">🏪 Drug Shelf</div>
-      <input
-        type="text"
-        id="shelf-search"
-        placeholder="🔍 Search drugs..."
-        autocomplete="off"
-      >
+      <input type="text" id="shelf-search" placeholder="🔍 Search..." autocomplete="off">
       <div id="shelf-list"></div>
     </div>
 
   </div><!-- end game-layout -->
+
+  <!-- Pharmacist Counter Strip -->
+  <div id="counter-strip">
+    <div class="counter-section" style="width:52px; align-items:center; justify-content:center;">
+      <div class="counter-prop">💊</div>
+    </div>
+    <div class="counter-section" id="counter-rx">
+      <div class="counter-section-label">Current Rx</div>
+      <div class="counter-rx-main" id="counter-rx-main">Waiting for patient...</div>
+      <div class="counter-rx-sub"  id="counter-rx-sub">Ready to help</div>
+    </div>
+    <div class="counter-section" id="counter-log">
+      <div class="counter-section-label">Recent Fills</div>
+      <div class="log-tape" id="log-tape"></div>
+    </div>
+    <div class="counter-section counter-props" id="counter-props">
+      <div class="counter-prop">☕</div>
+      <div id="streak-fire">🔥<span>0</span></div>
+    </div>
+  </div>
+
 </div><!-- end screen-game -->
 
 <!-- ═══════════════════════════════════════════
-     SCREEN: LUNCH BREAK
+     LUNCH BREAK SCREEN
      ═══════════════════════════════════════════ -->
 <div class="screen" id="screen-break">
   <div class="break-box">
     <div class="break-title">☕ Lunch Break!</div>
     <div class="break-sub" id="break-pharmacist">Dr. Pharmacist</div>
-    <div class="break-sub">Here's how your morning went:</div>
+    <div class="break-sub">Morning stats:</div>
 
     <div class="stats-grid">
       <div class="stat-card">
@@ -137,20 +163,17 @@
         <div class="stat-card-label">Best Streak</div>
       </div>
     </div>
-
     <div class="stat-card" style="margin-bottom:20px;">
       <div class="stat-card-val" id="break-pct">—</div>
       <div class="stat-card-label">Morning Accuracy</div>
     </div>
 
-    <button class="action-btn primary" id="resume-btn">
-      🏥 Back to Work (1 PM)
-    </button>
+    <button class="action-btn primary" id="resume-btn">🏥 Back to Work (1 PM)</button>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     SCREEN: END OF DAY
+     END OF DAY SCREEN
      ═══════════════════════════════════════════ -->
 <div class="screen" id="screen-end">
   <div class="end-box">
@@ -178,27 +201,24 @@
         <div class="stat-card-label">Best Streak</div>
       </div>
     </div>
-
-    <div class="stat-card" style="margin-bottom:20px;">
+    <div class="stat-card" style="margin-bottom:18px;">
       <div class="stat-card-val" id="end-pct">—</div>
       <div class="stat-card-label">Overall Accuracy</div>
     </div>
 
-    <!-- Missed drugs -->
     <div id="end-missed-section" style="display:none;">
-      <div class="missed-drugs-list">
-        <div class="missed-drugs-title">Drugs to Review:</div>
-        <div id="end-missed-list"></div>
+      <div class="missed-section">
+        <div class="missed-title">Drugs to Review:</div>
+        <div class="missed-list" id="end-missed-list"></div>
       </div>
     </div>
 
-    <button class="action-btn primary" id="new-shift-btn">
-      🔄 Start a New Shift
-    </button>
+    <button class="action-btn primary"   id="new-shift-btn">🔄 New Shift</button>
+    <button class="action-btn secondary" id="end-home-btn">🏠 Home</button>
   </div>
 </div>
 
-<!-- ═══ SCRIPTS ═══ -->
+<!-- Scripts — load order matters -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="drugs.js"></script>
 <script src="scenarios.js"></script>
